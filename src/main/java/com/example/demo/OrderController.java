@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +16,17 @@ public class OrderController {
 
     @PostMapping("/order")
     public OrderDetails placeOrder(@RequestBody OrderDetails order) {
-        return orderService.saveOrder(order);
+    	return orderService.saveOrder(order);
     }
 
     @GetMapping
     public List<OrderDetails> getAllOrders() {
         return orderService.getAllOrders();
+    }
+    
+    @GetMapping("/{orderId}")
+    public OrderDetails getOrderByOrderId(@PathVariable String orderId) {
+        return orderService.getOrderByOrderId(orderId);
     }
 }
 

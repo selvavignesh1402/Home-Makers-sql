@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -10,6 +11,7 @@ public class OrderDetails {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+	private String orderId;
     private String username;
     private String firstName;
     private String lastName;
@@ -30,7 +32,10 @@ public class OrderDetails {
     @JoinColumn(name = "order_id")
     private List<OrderItem> items;
 
-    // Getters and Setters
+    @PrePersist
+    public void prePersist() {
+        this.orderId = UUID.randomUUID().toString();
+    }
     
     public Long getId() {
         return id;
@@ -38,6 +43,14 @@ public class OrderDetails {
 
     public void setId(Long id) {
         this.id = id;
+    }
+    
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 
     public String getUsername() {
