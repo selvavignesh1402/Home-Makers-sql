@@ -25,5 +25,19 @@ public class OrderService {
         Optional<OrderDetails> order = orderRepository.findByOrderId(orderId);
         return order.orElse(null);
     }
+    
+    public List<OrderDetails> getOrdersByUsername(String username) {
+    	return orderRepository.findByUsername(username);
+    }
+    
+    public void updateOrderStatus(String orderId, String status) {
+        Optional<OrderDetails> order = orderRepository.findByOrderId(orderId);
+        if (order.isPresent()) {
+            OrderDetails updatedOrder = order.get();
+            updatedOrder.setOrderStatus(status);
+            orderRepository.save(updatedOrder);
+        }
+    }
+    
 }
 

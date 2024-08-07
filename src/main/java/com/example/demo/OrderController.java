@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,5 +29,18 @@ public class OrderController {
     public OrderDetails getOrderByOrderId(@PathVariable String orderId) {
         return orderService.getOrderByOrderId(orderId);
     }
+    
+    @GetMapping("/user/{username}") 
+    public List<OrderDetails> getOrdersByUsername(@PathVariable String username) {
+        return orderService.getOrdersByUsername(username);
+    }
+    
+    @PutMapping("/{orderId}/status")
+    public void updateOrderStatus(@PathVariable String orderId, @RequestBody Map<String, String> request) {
+        String status = request.get("status");
+        orderService.updateOrderStatus(orderId, status);
+    }
+    
+    
 }
 

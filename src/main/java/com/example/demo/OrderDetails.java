@@ -1,17 +1,17 @@
 package com.example.demo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import jakarta.persistence.*;
 
 @Entity
 public class OrderDetails {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-	private String orderId;
+    private String orderId;
     private String username;
     private String firstName;
     private String lastName;
@@ -27,16 +27,31 @@ public class OrderDetails {
     private String cvv;
     private String upiId;
     private Double totalPrice;
+    private String paymentStatus; 
+    private String orderStatus; 
 
-    @OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")
     private List<OrderItem> items;
+	
+	@Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     @PrePersist
     public void prePersist() {
         this.orderId = UUID.randomUUID().toString();
+        this.createdAt = LocalDateTime.now();
     }
     
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }
@@ -180,4 +195,20 @@ public class OrderDetails {
     public void setItems(List<OrderItem> items) {
         this.items = items;
     }
+   
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+    
+    public String getOrderStatus() {
+ 		return orderStatus;
+ 	}
+
+ 	public void setOrderStatus(String orderStatus) {
+ 		this.orderStatus = orderStatus;
+ 	}
 }
