@@ -3,6 +3,8 @@ package com.example.demo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -11,22 +13,32 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private EmailService otpService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
 
     public UserRegister registerUser(String name, String email, String password) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new IllegalArgumentException("User with email already exists");
+            throw new IllegalArgumentException("User with this email already exists");
         }
-
-//        if (!PASSWORD_PATTERN.matcher(password).matches()) {
-//            throw new IllegalArgumentException("Password must contain at least one digit, one lowercase, " +
-//                    "one uppercase letter, one special character, and must be at least 8 characters long");
-//        }
 
         UserRegister user = new UserRegister();
         user.setName(name);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+
+        String encodedPassword = passwordEncoder.encode(password);
+        user.setPassword(encodedPassword);  // Ensure this is encoded
+
+        System.out.println("Encoded Password: " + encodedPassword);
+
+        // Generate OTP, hash it, and set to the user
+        String generatedOtp = otpService.generateAndSendOTP(email);
+        String encodedOtp = passwordEncoder.encode(generatedOtp);
+        user.setOtp(encodedOtp);
+        user.setOtpVerified(false);
 
         return userRepository.save(user);
     }
@@ -40,20 +52,47 @@ public class UserService {
         UserRegister user = new UserRegister();
         user.setName(name);
         user.setEmail(email);
-        // You can set a default password for users registered through Google
         user.setPassword(passwordEncoder.encode("defaultGooglePassword"));
+
+        // Google users might not need OTP initially, but it can be added later if required.
+        user.setOtpVerified(true);
 
         return userRepository.save(user);
     }
-    
-    public UserRegister registerUserWithGoogle(String name, String email) {
-        return userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    UserRegister newUser = new UserRegister();
-                    newUser.setName(name);
-                    newUser.setEmail(email);
-                    newUser.setPassword(null);
-                    return userRepository.save(newUser);
-                });
+
+    public List<UserRegister> getAllUsers() {
+        return userRepository.findAll();
     }
+
+    public UserRegister deleteUser(Long id) {
+        userRepository.deleteById(id);
+        return null;
+    }
+
+    public UserRegister findUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    public UserRegister saveUser(UserRegister user) {
+        return userRepository.save(user);
+    }
+
+    public UserRegister verifyOtp(String email, String otp) {
+        UserRegister user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Verify the OTP by checking if the hashed OTP matches
+        if (passwordEncoder.matches(otp, user.getOtp())) {
+            user.setOtpVerified(true);
+            return userRepository.save(user);
+        } else {
+            throw new IllegalArgumentException("Invalid OTP");
+        }
+    }
+
+    public UserRegister findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found"));
+    }
+
 }

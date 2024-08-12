@@ -4,31 +4,63 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 public class OrderDetails {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+//    @Column(unique = true, nullable = false)
     private String orderId;
+
+//    @NotBlank(message = "Username is mandatory")
     private String username;
+
+//    @NotBlank(message = "First name is mandatory")
     private String firstName;
+
+//    @NotBlank(message = "Last name is mandatory")
     private String lastName;
+
+//    @NotBlank(message = "Country is mandatory")
     private String country;
+
+//    @NotBlank(message = "State is mandatory")
     private String state;
+
+   
     private String address;
+
+//    @NotBlank(message = "City is mandatory")
     private String city;
+
+   
     private String zipCode;
+
+  
     private String phone;
+
+    @NotBlank(message = "Payment method is mandatory")
     private String paymentMethod;
+
+   
     private String cardNumber;
+
+    
     private String expiryDate;
+
+   
     private String cvv;
+
     private String upiId;
     private Double totalPrice;
     private String paymentStatus; 
-    private String orderStatus; 
+    private String orderStatus = "waiting"; 
 
 	@OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")
